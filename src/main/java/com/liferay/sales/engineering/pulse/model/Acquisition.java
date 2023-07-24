@@ -7,14 +7,16 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Acquisition {
-    private @Id @GeneratedValue Long id;
     private String campaign;
     private String content;
+    private @Id
+    @GeneratedValue Long id;
     private String medium;
     private String source;
     private String term;
 
-    public Acquisition() {}
+    public Acquisition() {
+    }
 
     private Acquisition(AcquisitionBuilder builder) {
         this.campaign = builder.campaign;
@@ -24,8 +26,12 @@ public class Acquisition {
         this.term = builder.term;
     }
 
-    public Long getId() {
-        return id;
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Acquisition)) return false;
+        final Acquisition that = (Acquisition) o;
+        return Objects.equal(getId(), that.getId()) && Objects.equal(getCampaign(), that.getCampaign()) && Objects.equal(getContent(), that.getContent()) && Objects.equal(getMedium(), that.getMedium()) && Objects.equal(getSource(), that.getSource()) && Objects.equal(getTerm(), that.getTerm());
     }
 
     public String getCampaign() {
@@ -42,6 +48,10 @@ public class Acquisition {
 
     public void setContent(final String content) {
         this.content = content;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getMedium() {
@@ -69,14 +79,6 @@ public class Acquisition {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Acquisition)) return false;
-        final Acquisition that = (Acquisition) o;
-        return Objects.equal(getId(), that.getId()) && Objects.equal(getCampaign(), that.getCampaign()) && Objects.equal(getContent(), that.getContent()) && Objects.equal(getMedium(), that.getMedium()) && Objects.equal(getSource(), that.getSource()) && Objects.equal(getTerm(), that.getTerm());
-    }
-
-    @Override
     public int hashCode() {
         return Objects.hashCode(getId(), getCampaign(), getContent(), getMedium(), getSource(), getTerm());
     }
@@ -94,7 +96,7 @@ public class Acquisition {
     }
 
     public static class AcquisitionBuilder {
-        private String campaign;
+        private final String campaign;
         private String content;
         private String medium;
         private String source;
@@ -102,6 +104,10 @@ public class Acquisition {
 
         public AcquisitionBuilder(String campaign) {
             this.campaign = campaign;
+        }
+
+        public Acquisition build() {
+            return new Acquisition(this);
         }
 
         public AcquisitionBuilder withContent(String content) {
@@ -123,7 +129,5 @@ public class Acquisition {
             this.term = term;
             return this;
         }
-
-        public Acquisition build() { return new Acquisition(this); }
     }
 }

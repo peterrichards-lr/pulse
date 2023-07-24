@@ -1,6 +1,9 @@
 package com.liferay.sales.engineering.pulse.persistence;
 
-import com.liferay.sales.engineering.pulse.model.*;
+import com.liferay.sales.engineering.pulse.model.Acquisition;
+import com.liferay.sales.engineering.pulse.model.Campaign;
+import com.liferay.sales.engineering.pulse.model.Status;
+import com.liferay.sales.engineering.pulse.model.UrlToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,17 +34,6 @@ public class DatabaseLoader implements CommandLineRunner {
         this.urlTokenRepository = urlTokenRepository;
     }
 
-    @Override
-    public void run(String... params) {
-        populateStatus();
-        logger.info("Populated statuses");
-        buildCampaigns();
-    }
-
-    private void populateStatus() {
-        Arrays.asList("Draft","Active","Complete","Inactive").forEach((name) -> statusRepository.save(new Status(name)));
-    }
-
     private void buildCampaigns() {
         // Complete campaign
         Campaign.CampaignBuilder campaignBuilder = new Campaign.CampaignBuilder("23Q1", getStatus("Complete"), "/redirect");
@@ -56,7 +48,7 @@ public class DatabaseLoader implements CommandLineRunner {
         logger.info("Added completed campaign {} for {}", campaign.getName(), urlToken.getToken());
 
         // Expired campaign
-        campaignBuilder = new Campaign.CampaignBuilder("July Promo", getStatus("Active"), "/redirect");
+        campaignBuilder = new Campaign.CampaignBuilder("July Promo", getStatus("Expired"), "/redirect");
         campaignBuilder.withBegin(LocalDateTime.parse("2023-07-01T00:00:00"));
         campaignBuilder.withEnd(LocalDateTime.parse("2023-07-22T00:00:00"));
         campaign = campaignBuilder.build();
@@ -74,7 +66,7 @@ public class DatabaseLoader implements CommandLineRunner {
         campaign = campaignBuilder.build();
         campaignRepository.save(campaign);
 
-        Acquisition.AcquisitionBuilder acquisitionBuilder = new Acquisition.AcquisitionBuilder("Free  trial");
+        Acquisition.AcquisitionBuilder acquisitionBuilder = new Acquisition.AcquisitionBuilder("Free trial");
         acquisitionBuilder.withMedium("cpc");
         Acquisition cpcAcquisition = acquisitionBuilder.build();
         acquisitionRepository.save(cpcAcquisition);
@@ -124,5 +116,16 @@ public class DatabaseLoader implements CommandLineRunner {
 
     private Status getStatus(String name) {
         return statusRepository.findByName(name);
+    }
+
+    private void populateStatus() {
+        Arrays.asList("Draft", "Active", "Complete", "Inactive", "Expired").forEach((name) -> statusRepository.save(new Status(name)));
+    }
+
+    @Override
+    public void run(String... params) {
+        populateStatus();
+        logger.info("Populated statuses");
+        buildCampaigns();
     }
 }

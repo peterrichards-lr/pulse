@@ -2,19 +2,23 @@ package com.liferay.sales.engineering.pulse.model;
 
 import com.google.common.base.Objects;
 import com.liferay.sales.engineering.pulse.util.StringUtils;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class UrlToken {
-    private @Id String token;
-    @ManyToOne
-    @JoinColumn(name = "campaign_id")
-    private Campaign campaign;
     @ManyToOne
     @JoinColumn(name = "acquisition_id")
     private Acquisition acquisition;
+    @ManyToOne
+    @JoinColumn(name = "campaign_id")
+    private Campaign campaign;
+    private @Id String token;
 
-    public UrlToken() {}
+    public UrlToken() {
+    }
 
     private UrlToken(UrlTokenBuilder builder) {
         this.token = builder.token;
@@ -22,16 +26,11 @@ public class UrlToken {
         this.acquisition = builder.acquisition;
     }
 
-    public String getToken() { return token; }
-
-    public void setToken(String token) { this.token = token; }
-
-    public Campaign getCampaign() {
-        return campaign;
-    }
-
-    public void setCampaign(Campaign campaign) {
-        this.campaign = campaign;
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof final UrlToken urlToken)) return false;
+        return Objects.equal(token, urlToken.token) && Objects.equal(getCampaign(), urlToken.getCampaign()) && Objects.equal(getAcquisition(), urlToken.getAcquisition());
     }
 
     public Acquisition getAcquisition() {
@@ -42,11 +41,20 @@ public class UrlToken {
         this.acquisition = acquisition;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof final UrlToken urlToken)) return false;
-        return Objects.equal(token, urlToken.token) && Objects.equal(getCampaign(), urlToken.getCampaign()) && Objects.equal(getAcquisition(), urlToken.getAcquisition());
+    public Campaign getCampaign() {
+        return campaign;
+    }
+
+    public void setCampaign(Campaign campaign) {
+        this.campaign = campaign;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     @Override
@@ -64,8 +72,8 @@ public class UrlToken {
     }
 
     public static class UrlTokenBuilder {
-        private String token;
-        private Campaign campaign;
+        private final Campaign campaign;
+        private final String token;
         private Acquisition acquisition;
 
         public UrlTokenBuilder(String token, Campaign campaign) {
@@ -79,6 +87,10 @@ public class UrlToken {
             this.campaign = campaign;
         }
 
+        public UrlToken build() {
+            return new UrlToken(this);
+        }
+
         public UrlTokenBuilder withAcquisition(Acquisition acquisition) {
             if (acquisition == null) {
                 throw new IllegalArgumentException("Acquisition cannot be null");
@@ -86,7 +98,5 @@ public class UrlToken {
             this.acquisition = acquisition;
             return this;
         }
-
-        public UrlToken build() { return new UrlToken(this); }
     }
 }

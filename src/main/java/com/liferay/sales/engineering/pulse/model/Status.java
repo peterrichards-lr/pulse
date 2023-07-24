@@ -7,13 +7,23 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Status {
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     private Long id;
     private String name;
 
-    public Status() {}
+    public Status() {
+    }
+
     public Status(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof final Status status)) return false;
+        return Objects.equal(getId(), status.getId()) && Objects.equal(getName(), status.getName());
     }
 
     public Long getId() {
@@ -26,13 +36,6 @@ public class Status {
 
     public void setName(final String name) {
         this.name = name;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof final Status status)) return false;
-        return Objects.equal(getId(), status.getId()) && Objects.equal(getName(), status.getName());
     }
 
     @Override
