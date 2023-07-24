@@ -38,3 +38,4 @@ out/
 /node
 /node_modules
 /tmp
+/src/main/resources/static/built
