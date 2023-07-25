@@ -26,6 +26,8 @@ const Campaigns = () => {
             <dd className="info-item">{datetimeFormatter.format(new Date(campaign.begin))}</dd>
             <dt>End</dt>
             <dd className="info-item">{campaign.end ? datetimeFormatter.format(new Date(campaign.end)) : "N/A"}</dd>
+            <dt>Campaign URL</dt>
+            <dd className="info-item">{campaign.campaignUrl}</dd>
         </dl>
         <h2>URL Tokens</h2>
         <CampaignUrlTokens campaignId={campaign.id}/>
