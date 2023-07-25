@@ -34,3 +34,14 @@
     font-weight: bold;
     color: #009879;
 }
+
+dl.info-grid {
+    display: grid;
+    grid-template-columns: auto auto;
+    padding: .5rem;
+}
+
+.info-grid dt, .info-grid dd {
+    font-weight: bold;
+    padding: .5rem;
+}

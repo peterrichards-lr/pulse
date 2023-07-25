@@ -19,11 +19,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
@@ -36,6 +33,12 @@ public class RedirectController {
     private final InteractionRepository interactionRepository;
     private final UrlTokenRepository tokenRepository;
     Logger logger = LoggerFactory.getLogger(RedirectController.class);
+    @Value("${server.host}")
+    private String serverHost;
+    @Value("${server.port}")
+    private String serverPort;
+    @Value("${server.scheme}")
+    private String serverScheme;
 
     @Autowired
     public RedirectController(UrlTokenRepository tokenRepository, final InteractionRepository interactionRepository) {
@@ -99,7 +102,7 @@ public class RedirectController {
         return new URL(url.toString());
     }
 
-    private void configureRedirection(final Campaign campaign, final Acquisition acquisition, final String urlToken, final Long interactionId, final HttpServletResponse httpServletResponse) throws MalformedURLException, UnknownHostException {
+    private void configureRedirection(final Campaign campaign, final Acquisition acquisition, final String urlToken, final Long interactionId, final HttpServletResponse httpServletResponse) throws MalformedURLException {
         final String redirectionUrl = buildUrl(campaign.getCampaignUrl(), acquisition).toString();
         httpServletResponse.setHeader("Location", redirectionUrl);
 
@@ -116,6 +119,11 @@ public class RedirectController {
     private boolean isCampaignActive(final Campaign campaign, final LocalDateTime interactionTime) {
         final String status = campaign.getStatus().getName();
         return status.equals("Active") && (campaign.getEnd() == null || campaign.getEnd().isAfter(interactionTime));
+    }
+
+    private boolean isCampaignDraft(final Campaign campaign) {
+        final String status = campaign.getStatus().getName();
+        return status.equals("Draft");
     }
 
     private Long recordInteraction(final Campaign campaign, final LocalDateTime interactionTime, final HttpServletRequest httpServletRequest) {
@@ -137,20 +145,26 @@ public class RedirectController {
         httpServletResponse.setStatus(204);
     }
 
-    @RequestMapping(value = {"/{urlToken:[A-z]{8}}" })
-    public void redirect(@PathVariable final String urlToken, final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws UnsupportedEncodingException, MalformedURLException, UnknownHostException {
+    @RequestMapping(value = {"/{urlToken:[A-z]{8}}"})
+    public void redirect(@PathVariable final String urlToken, final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws MalformedURLException {
         final LocalDateTime interactionTime = LocalDateTime.now(ZoneId.of("UTC"));
         final Optional<UrlToken> optionalToken = tokenRepository.findById(urlToken);
 
         if (optionalToken.isEmpty()) {
+            logger.info("No token found for : {}", urlToken);
             httpServletResponse.setStatus(404);
             return;
         }
 
         final UrlToken token = optionalToken.get();
-        logger.info(token.toString());
+        logger.info("token : {}", token.toString());
 
         final Campaign campaign = token.getCampaign();
+
+        if (isCampaignDraft(campaign)) {
+            httpServletResponse.setStatus(423);
+            return;
+        }
 
         if (!isCampaignActive(campaign, interactionTime)) {
             httpServletResponse.setStatus(410);
@@ -162,13 +176,4 @@ public class RedirectController {
 
         configureRedirection(campaign, acquisition, urlToken, interactionId, httpServletResponse);
     }
-
-    @Value("${server.port}")
-    private String serverPort;
-
-    @Value("${server.host}")
-    private String serverHost;
-
-    @Value("${server.scheme}")
-    private String serverScheme;
 }

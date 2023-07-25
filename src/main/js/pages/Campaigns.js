@@ -4,7 +4,7 @@ import CampaignList from "../components/CampaignList";
 const Campaigns = () => {
     return <>
         <h1>Campaigns</h1>
-        <CampaignList />
+        <CampaignList/>
     </>
 };
 

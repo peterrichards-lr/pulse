@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, Link } from "react-router-dom";
+import {Link, Outlet} from "react-router-dom";
 
 const Layout = () => {
     return (
@@ -15,7 +15,7 @@ const Layout = () => {
                 </ul>
             </nav>
 
-            <Outlet />
+            <Outlet/>
         </>
     )
 };

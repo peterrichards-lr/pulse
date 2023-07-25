@@ -15,9 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/url-tokens")
 public class UrlTokenController {
-    private final UrlTokenRepository urlTokenRepository;
-
     private final CampaignRepository campaignRepository;
+    private final UrlTokenRepository urlTokenRepository;
 
     UrlTokenController(final UrlTokenRepository urlTokenRepository, final CampaignRepository campaignRepository) {
         this.urlTokenRepository = urlTokenRepository;

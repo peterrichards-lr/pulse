@@ -22,14 +22,14 @@ const CampaignList = (props) => {
     return (
         <table className="styled-table">
             <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Begin</th>
-                    <th>End</th>
-                    <th>Campaign URL</th>
-                    <th>Status</th>
-                </tr>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Begin</th>
+                <th>End</th>
+                <th>Campaign URL</th>
+                <th>Status</th>
+            </tr>
             </thead>
             <tbody>
             {campaigns}

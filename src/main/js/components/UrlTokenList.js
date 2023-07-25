@@ -1,22 +1,8 @@
 import React from "react";
-import {useEffect, useState} from "react";
 import UrlToken from "./UrlToken";
 
 const UrlTokenList = (props) => {
-    const [urlTokenData, setUrlTokenData] = useState()
-
-    useEffect(() => {
-        const headers = {
-            HEADER_CONTENT_TYPE: 'application/json',
-        };
-        fetch(`/api/url-tokens`, {headers})
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data);
-                const {content, totalElements} = data;
-                setUrlTokenData(content);
-            })
-    }, [props]);
+    const urlTokenData = props.urlTokens;
 
     const urlTokens = urlTokenData && urlTokenData.map(urlToken => {
         return <UrlToken key={urlToken.token} urlToken={urlToken}/>

@@ -1,4 +1,6 @@
 import React from "react";
+import {Link} from "react-router-dom";
+
 const UrlToken = (props) => {
     const urlToken = props.urlToken;
 
@@ -6,7 +8,7 @@ const UrlToken = (props) => {
         urlToken &&
         <tr data-interaction-id={urlToken.token}>
             <td>{urlToken.token}</td>
-            <td>{urlToken.campaign.name}</td>
+            <td><Link to='/campaign' state={{campaign: urlToken.campaign}}>{urlToken.campaign.name}</Link></td>
             <td>{urlToken.campaign.status && urlToken.campaign.status.name}</td>
             <td>{urlToken.acquisition && urlToken.acquisition.campaign}</td>
             <td>{urlToken.acquisition && urlToken.acquisition.content}</td>

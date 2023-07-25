@@ -4,8 +4,9 @@
   "description": "Campaign management tool",
   "main": "webpack.config.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
-    "watch": "webpack --watch -d source-map"
+    "build": "echo Building frontend && webpack --config webpack.config.js",
+    "watch": "echo Watching frontend && webpack --watch -d source-map",
+    "check": "echo Checking frontend"
   },
   "author": "Peter Richards",
   "dependencies": {

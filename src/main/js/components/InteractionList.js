@@ -1,28 +1,26 @@
 import React, {useEffect, useState} from "react";
 import Interaction from "./Interaction";
+import {Navigate} from "react-router-dom";
 
 const InteractionList = (props) => {
+    if (!props.campaignId) {
+        return <Navigate to="/"/>
+    }
+
     const [interactionData, setInteractionData] = useState()
 
     useEffect(() => {
         const headers = {
             HEADER_CONTENT_TYPE: 'application/json',
         };
-        if (props.campaignId) {
-            fetch(`/api/campaigns/${props.campaignId}/interactions`, {headers})
-                .then((response) => response.json())
-                .then((data) => {
-                    const {content, totalElements} = data;
-                    setInteractionData(content);
-                })
-        } else {
-            fetch(`/api/interactions`, {headers})
-                .then((response) => response.json())
-                .then((data) => {
-                    const {content, totalElements} = data;
-                    setInteractionData(content);
-                })
-        }
+
+        fetch(`/api/campaigns/${props.campaignId}/interactions`, {headers})
+            .then((response) => response.json())
+            .then((data) => {
+                const {content, totalElements} = data;
+                setInteractionData(content);
+            })
+
     }, [props]);
 
     const interactions = interactionData && interactionData.map(interaction => {
