@@ -7,7 +7,7 @@ const UrlToken = (props) => {
     return (
         urlToken &&
         <tr data-interaction-id={urlToken.token}>
-            <td>{urlToken.token}</td>
+            <td><a target="_blank" href={"/" + urlToken.token}>{urlToken.token}</a></td>
             <td><Link to='/campaign' state={{campaign: urlToken.campaign}}>{urlToken.campaign.name}</Link></td>
             <td>{urlToken.campaign.status && urlToken.campaign.status.name}</td>
             <td>{urlToken.acquisition && urlToken.acquisition.campaign}</td>
