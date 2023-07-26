@@ -1,5 +1,6 @@
 package com.liferay.sales.engineering.pulse;
 
+import com.google.common.net.InternetDomainName;
 import com.liferay.sales.engineering.pulse.model.Acquisition;
 import com.liferay.sales.engineering.pulse.model.Campaign;
 import com.liferay.sales.engineering.pulse.model.Interaction;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.net.MalformedURLException;
@@ -27,27 +29,33 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
-public class RedirectController {
+public final class RedirectController {
     private final InteractionRepository interactionRepository;
+    private final Logger logger = LoggerFactory.getLogger(RedirectController.class);
     private final UrlTokenRepository tokenRepository;
-    Logger logger = LoggerFactory.getLogger(RedirectController.class);
+    @Value("${cookie.domain}")
+    private String cookieDomain;
     @Value("${server.host}")
     private String serverHost;
     @Value("${server.port}")
     private String serverPort;
     @Value("${server.scheme}")
     private String serverScheme;
-    @Value("${cookie.domain}")
-    private String cookieDomain;
+
     @Autowired
-    public RedirectController(UrlTokenRepository tokenRepository, final InteractionRepository interactionRepository) {
+    public RedirectController(final UrlTokenRepository tokenRepository,
+                              final InteractionRepository interactionRepository) {
         this.tokenRepository = tokenRepository;
         this.interactionRepository = interactionRepository;
     }
 
-    private void addCookies(final Map<String, String> cookieMap, final HttpServletResponse httpServletResponse) {
+    private void addCookies(final Map<String, String> cookieMap,
+                            final InternetDomainName hostDomainName,
+                            final HttpServletResponse httpServletResponse) {
         cookieMap.keySet().stream().map((key) -> {
             final String value = cookieMap.get(key);
             final Cookie cookie = new Cookie(key, value);
@@ -55,12 +63,15 @@ public class RedirectController {
             cookie.setSecure(true);
             if (!StringUtils.isBlank(cookieDomain)) {
                 cookie.setDomain(cookieDomain);
+            } else if (hostDomainName.isUnderRegistrySuffix() && StringUtils.isNotBlank(hostDomainName.publicSuffix().toString())) {
+                cookie.setDomain(hostDomainName.publicSuffix().toString());
             }
             return cookie;
         }).forEach(httpServletResponse::addCookie);
     }
 
-    private URL buildUrl(String campaignUrl, Acquisition acquisition) throws MalformedURLException {
+    private URL buildUrl(final String campaignUrl,
+                         final Acquisition acquisition) throws MalformedURLException {
         final String baseUrl;
         if (campaignUrl.startsWith("/")) {
             logger.info("Default server scheme : {}", serverScheme);
@@ -110,7 +121,12 @@ public class RedirectController {
         return new URL(url.toString());
     }
 
-    private void configureRedirection(final Campaign campaign, final Acquisition acquisition, final String urlToken, final Long interactionId, final HttpServletResponse httpServletResponse) throws MalformedURLException {
+    private void configureRedirection(final Campaign campaign,
+                                      final Acquisition acquisition,
+                                      final String urlToken,
+                                      final Long interactionId,
+                                      final InternetDomainName hostDomainName,
+                                      final HttpServletResponse httpServletResponse) throws MalformedURLException {
         final String redirectionUrl = buildUrl(campaign.getCampaignUrl(), acquisition).toString();
         httpServletResponse.setHeader("Location", redirectionUrl);
 
@@ -120,11 +136,12 @@ public class RedirectController {
             put("__intId", String.valueOf(interactionId));
         }};
 
-        addCookies(cookies, httpServletResponse);
+        addCookies(cookies, hostDomainName, httpServletResponse);
         httpServletResponse.setStatus(302);
     }
 
-    private boolean isCampaignActive(final Campaign campaign, final LocalDateTime interactionTime) {
+    private boolean isCampaignActive(final Campaign campaign,
+                                     final LocalDateTime interactionTime) {
         final String status = campaign.getStatus().getName();
         return status.equals("Active") && (campaign.getEnd() == null || campaign.getEnd().isAfter(interactionTime));
     }
@@ -134,7 +151,9 @@ public class RedirectController {
         return status.equals("Draft");
     }
 
-    private Long recordInteraction(final Campaign campaign, final LocalDateTime interactionTime, final HttpServletRequest httpServletRequest) {
+    private Long recordInteraction(final Campaign campaign,
+                                   final LocalDateTime interactionTime,
+                                   final HttpServletRequest httpServletRequest) {
         final String userAgent = httpServletRequest.getHeader("User-Agent");
         final String ipAddress = HttpRequestResponseUtils.getClientIpAddressIfServletRequestExist();
         final Interaction interaction = new Interaction(Interaction.Type.CLICK);
@@ -147,14 +166,30 @@ public class RedirectController {
     }
 
     @RequestMapping(value = "/redirect")
-    public void redirect(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public void redirect(final HttpServletRequest httpServletRequest,
+                         final HttpServletResponse httpServletResponse) {
         logger.info(httpServletRequest.getQueryString());
         Collections.list(httpServletRequest.getHeaderNames()).forEach((headerName -> logger.info("{} : {}", headerName, httpServletRequest.getHeader(headerName))));
         httpServletResponse.setStatus(204);
     }
 
     @RequestMapping(value = {"/{urlToken:[A-z]{8}}"})
-    public void redirect(@PathVariable final String urlToken, final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws MalformedURLException {
+    public void redirect(@RequestHeader final String host,
+                         @PathVariable final String urlToken,
+                         final HttpServletRequest httpServletRequest,
+                         final HttpServletResponse httpServletResponse) throws MalformedURLException {
+        logger.info("host : {}", host);
+        InternetDomainName hostDomainName = null;
+        try {
+            Pattern pattern = Pattern.compile("^([^#]*?):?\\d*?$");
+            Matcher matcher = pattern.matcher(host);
+            if (matcher.find()) {
+                hostDomainName = InternetDomainName.from(matcher.group(1));
+            }
+        } catch (IllegalArgumentException e) {
+            logger.warn(e.getMessage());
+        }
+
         final LocalDateTime interactionTime = LocalDateTime.now(ZoneId.of("UTC"));
         final Optional<UrlToken> optionalToken = tokenRepository.findById(urlToken);
 
@@ -165,7 +200,7 @@ public class RedirectController {
         }
 
         final UrlToken token = optionalToken.get();
-        logger.info("token : {}", token.toString());
+        logger.info("token : {}", token);
 
         final Campaign campaign = token.getCampaign();
 
@@ -182,7 +217,7 @@ public class RedirectController {
         final Long interactionId = recordInteraction(campaign, interactionTime, httpServletRequest);
         final Acquisition acquisition = token.getAcquisition();
 
-        configureRedirection(campaign, acquisition, urlToken, interactionId, httpServletResponse);
+        configureRedirection(campaign, acquisition, urlToken, interactionId, hostDomainName, httpServletResponse);
         logger.info("Redirecting to {}", httpServletResponse.getHeader("Location"));
     }
 }
