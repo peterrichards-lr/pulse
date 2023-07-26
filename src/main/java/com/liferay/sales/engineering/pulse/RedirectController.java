@@ -63,9 +63,11 @@ public final class RedirectController {
             cookie.setSecure(true);
             if (!StringUtils.isBlank(cookieDomain)) {
                 cookie.setDomain(cookieDomain);
-            } else if (hostDomainName.isUnderRegistrySuffix() && StringUtils.isNotBlank(hostDomainName.publicSuffix().toString())) {
+            } else if (hostDomainName.isUnderRegistrySuffix() &&
+                            StringUtils.isNotBlank(hostDomainName.publicSuffix().toString())) {
                 cookie.setDomain(hostDomainName.publicSuffix().toString());
             }
+            logger.info("Cookie domain : {}", cookie.getDomain());
             return cookie;
         }).forEach(httpServletResponse::addCookie);
     }
