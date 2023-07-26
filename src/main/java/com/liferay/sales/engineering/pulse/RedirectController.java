@@ -39,7 +39,8 @@ public class RedirectController {
     private String serverPort;
     @Value("${server.scheme}")
     private String serverScheme;
-
+    @Value("${cookie.domain}")
+    private String cookieDomain;
     @Autowired
     public RedirectController(UrlTokenRepository tokenRepository, final InteractionRepository interactionRepository) {
         this.tokenRepository = tokenRepository;
@@ -52,6 +53,9 @@ public class RedirectController {
             final Cookie cookie = new Cookie(key, value);
             cookie.setHttpOnly(false);
             cookie.setSecure(true);
+            if (!StringUtils.isBlank(cookieDomain)) {
+                cookie.setDomain(cookieDomain);
+            }
             return cookie;
         }).forEach(httpServletResponse::addCookie);
     }
@@ -59,10 +63,14 @@ public class RedirectController {
     private URL buildUrl(String campaignUrl, Acquisition acquisition) throws MalformedURLException {
         final String baseUrl;
         if (campaignUrl.startsWith("/")) {
+            logger.info("Default server scheme : {}", serverScheme);
+            logger.info("Default server serverHost : {}", serverHost);
+            logger.info("Default server serverPort : {}", serverPort);
             baseUrl = serverScheme + "://" + serverHost + (StringUtils.isNotBlank(serverPort) ? ":" + serverPort : "") + campaignUrl;
         } else {
             baseUrl = campaignUrl;
         }
+        logger.info("baseUrl : {}", baseUrl);
         if (acquisition == null) return new URL(baseUrl);
 
         StringBuilder url = new StringBuilder(baseUrl);
@@ -175,5 +183,6 @@ public class RedirectController {
         final Acquisition acquisition = token.getAcquisition();
 
         configureRedirection(campaign, acquisition, urlToken, interactionId, httpServletResponse);
+        logger.info("Redirecting to {}", httpServletResponse.getHeader("Location"));
     }
 }
