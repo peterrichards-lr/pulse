@@ -76,7 +76,7 @@ public class DatabaseLoader implements CommandLineRunner {
         urlToken = tokenBuilder.build();
         urlTokenRepository.save(urlToken);
 
-        logger.info("Added active campaign {} for {} with acquisition {}", campaign.getName(), urlToken.getToken(), cpcAcquisition.getCampaign());
+        logger.info("Added active campaign {} for {} with acquisition {}", campaign.getName(), urlToken.getToken());
 
         acquisitionBuilder = new Acquisition.AcquisitionBuilder("Free trial");
         acquisitionBuilder.withMedium("organic");
@@ -88,7 +88,7 @@ public class DatabaseLoader implements CommandLineRunner {
         urlToken = tokenBuilder.build();
         urlTokenRepository.save(urlToken);
 
-        logger.info("Added active campaign {} for {} with acquisition {}", campaign.getName(), urlToken.getToken(), organicAcquisition.getCampaign());
+        logger.info("Added active campaign {} for {} with acquisition {}", campaign.getName(), urlToken.getToken());
 
         // Active campaign w/o acquisitions
         campaignBuilder = new Campaign.CampaignBuilder("Email campaign", getStatus("Active"), "/redirect");

@@ -72,8 +72,9 @@ public final class RedirectController {
         }).forEach(httpServletResponse::addCookie);
     }
 
-    private URL buildUrl(final String campaignUrl,
+    private URL buildUrl(final Campaign campaign,
                          final Acquisition acquisition) throws MalformedURLException {
+        final String campaignUrl = campaign.getCampaignUrl();
         final String baseUrl;
         if (campaignUrl.startsWith("/")) {
             logger.info("Default server scheme : {}", serverScheme);
@@ -84,14 +85,16 @@ public final class RedirectController {
             baseUrl = campaignUrl;
         }
         logger.info("baseUrl : {}", baseUrl);
-        if (acquisition == null) return new URL(baseUrl);
 
         StringBuilder url = new StringBuilder(baseUrl);
         url.append("?");
-        if (StringUtils.isNotBlank(acquisition.getCampaign())) {
+        if (StringUtils.isNotBlank(campaign.getName())) {
             url.append("utm_campaign=");
-            url.append(acquisition.getCampaign());
+            url.append(campaign.getName());
         }
+
+        if (acquisition == null) return new URL(url.toString());
+
         if (StringUtils.isNotBlank(acquisition.getContent())) {
             if (url.length() > 1) {
                 url.append("&");
@@ -129,7 +132,7 @@ public final class RedirectController {
                                       final Long interactionId,
                                       final InternetDomainName hostDomainName,
                                       final HttpServletResponse httpServletResponse) throws MalformedURLException {
-        final String redirectionUrl = buildUrl(campaign.getCampaignUrl(), acquisition).toString();
+        final String redirectionUrl = buildUrl(campaign, acquisition).toString();
         httpServletResponse.setHeader("Location", redirectionUrl);
 
         final Map<String, String> cookies = new HashMap<>() {{

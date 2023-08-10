@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Acquisition {
-    private String campaign;
     private String content;
     private @Id
     @GeneratedValue Long id;
@@ -19,7 +18,6 @@ public class Acquisition {
     }
 
     private Acquisition(AcquisitionBuilder builder) {
-        this.campaign = builder.campaign;
         this.content = builder.content;
         this.medium = builder.medium;
         this.source = builder.source;
@@ -31,15 +29,7 @@ public class Acquisition {
         if (this == o) return true;
         if (!(o instanceof Acquisition)) return false;
         final Acquisition that = (Acquisition) o;
-        return Objects.equal(getId(), that.getId()) && Objects.equal(getCampaign(), that.getCampaign()) && Objects.equal(getContent(), that.getContent()) && Objects.equal(getMedium(), that.getMedium()) && Objects.equal(getSource(), that.getSource()) && Objects.equal(getTerm(), that.getTerm());
-    }
-
-    public String getCampaign() {
-        return campaign;
-    }
-
-    public void setCampaign(final String campaign) {
-        this.campaign = campaign;
+        return Objects.equal(getId(), that.getId()) && Objects.equal(getContent(), that.getContent()) && Objects.equal(getMedium(), that.getMedium()) && Objects.equal(getSource(), that.getSource()) && Objects.equal(getTerm(), that.getTerm());
     }
 
     public String getContent() {
@@ -80,14 +70,13 @@ public class Acquisition {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId(), getCampaign(), getContent(), getMedium(), getSource(), getTerm());
+        return Objects.hashCode(getId(), getContent(), getMedium(), getSource(), getTerm());
     }
 
     @Override
     public String toString() {
         return "Acquisition{" +
                 "id=" + id +
-                ", campaign='" + campaign + '\'' +
                 ", content='" + content + '\'' +
                 ", medium='" + medium + '\'' +
                 ", source='" + source + '\'' +

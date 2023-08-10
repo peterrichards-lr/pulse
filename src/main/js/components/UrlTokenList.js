@@ -14,7 +14,6 @@ const UrlTokenList = (props) => {
                 <th>Url Token</th>
                 <th>Campaign</th>
                 <th>Campaign Status</th>
-                <th>UTM Campaign</th>
                 <th>UTM Content</th>
                 <th>UTM Medium</th>
                 <th>UTM Source</th>

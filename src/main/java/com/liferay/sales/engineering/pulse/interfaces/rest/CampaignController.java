@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/campaigns")
 public class CampaignController {
     private final CampaignRepository campaignRepository;

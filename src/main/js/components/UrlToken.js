@@ -10,7 +10,6 @@ const UrlToken = (props) => {
             <td><a target="_blank" href={"/" + urlToken.token}>{urlToken.token}</a></td>
             <td><Link to='/campaign' state={{campaign: urlToken.campaign}}>{urlToken.campaign.name}</Link></td>
             <td>{urlToken.campaign.status && urlToken.campaign.status.name}</td>
-            <td>{urlToken.acquisition && urlToken.acquisition.campaign}</td>
             <td>{urlToken.acquisition && urlToken.acquisition.content}</td>
             <td>{urlToken.acquisition && urlToken.acquisition.medium}</td>
             <td>{urlToken.acquisition && urlToken.acquisition.source}</td>
