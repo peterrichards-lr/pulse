@@ -66,7 +66,7 @@ public class DatabaseLoader implements CommandLineRunner {
         campaign = campaignBuilder.build();
         campaignRepository.save(campaign);
 
-        Acquisition.AcquisitionBuilder acquisitionBuilder = new Acquisition.AcquisitionBuilder("Free trial");
+        Acquisition.AcquisitionBuilder acquisitionBuilder = new Acquisition.AcquisitionBuilder();
         acquisitionBuilder.withMedium("cpc");
         Acquisition cpcAcquisition = acquisitionBuilder.build();
         acquisitionRepository.save(cpcAcquisition);
@@ -78,7 +78,7 @@ public class DatabaseLoader implements CommandLineRunner {
 
         logger.info("Added active campaign {} for {} with acquisition {}", campaign.getName(), urlToken.getToken());
 
-        acquisitionBuilder = new Acquisition.AcquisitionBuilder("Free trial");
+        acquisitionBuilder = new Acquisition.AcquisitionBuilder();
         acquisitionBuilder.withMedium("organic");
         Acquisition organicAcquisition = acquisitionBuilder.build();
         acquisitionRepository.save(organicAcquisition);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.google.common.base.Objects;
 import com.liferay.sales.engineering.pulse.util.StringUtils;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -12,6 +13,7 @@ import java.time.ZoneId;
 public class Campaign {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime begin;
+    @NotBlank
     private String campaignUrl;
     private String description;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -19,9 +21,10 @@ public class Campaign {
     private @Id
     @GeneratedValue Long id;
     @Column(unique = true)
+    @NotBlank
     private String name;
     @ManyToOne
-    @JoinColumn(name = "status_id")
+    @JoinColumn(name = "status_id", nullable = false)
     private Status status;
 
     public Campaign() {

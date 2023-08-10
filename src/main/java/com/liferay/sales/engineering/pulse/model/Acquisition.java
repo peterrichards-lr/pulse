@@ -1,6 +1,7 @@
 package com.liferay.sales.engineering.pulse.model;
 
 import com.google.common.base.Objects;
+import com.liferay.sales.engineering.pulse.util.StringUtils;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -85,17 +86,19 @@ public class Acquisition {
     }
 
     public static class AcquisitionBuilder {
-        private final String campaign;
         private String content;
         private String medium;
         private String source;
         private String term;
 
-        public AcquisitionBuilder(String campaign) {
-            this.campaign = campaign;
-        }
-
         public Acquisition build() {
+
+            if (StringUtils.isBlank(content) &&
+                    StringUtils.isBlank(medium) &&
+                    StringUtils.isBlank(source) &&
+                    StringUtils.isBlank(term)) {
+                return null;
+            }
             return new Acquisition(this);
         }
 

@@ -64,7 +64,7 @@ public final class RedirectController {
             if (!StringUtils.isBlank(cookieDomain)) {
                 cookie.setDomain(cookieDomain);
             } else if (hostDomainName.isUnderRegistrySuffix() &&
-                            StringUtils.isNotBlank(hostDomainName.publicSuffix().toString())) {
+                    StringUtils.isNotBlank(hostDomainName.publicSuffix().toString())) {
                 cookie.setDomain(hostDomainName.publicSuffix().toString());
             }
             logger.info("Cookie domain : {}", cookie.getDomain());

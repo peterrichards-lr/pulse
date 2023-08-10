@@ -1,7 +1,6 @@
 package com.liferay.sales.engineering.pulse.interfaces.rest;
 
 import com.liferay.sales.engineering.pulse.model.UrlToken;
-import com.liferay.sales.engineering.pulse.persistence.CampaignRepository;
 import com.liferay.sales.engineering.pulse.persistence.UrlTokenRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,12 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/url-tokens")
 public class UrlTokenController {
-    private final CampaignRepository campaignRepository;
     private final UrlTokenRepository urlTokenRepository;
 
-    UrlTokenController(final UrlTokenRepository urlTokenRepository, final CampaignRepository campaignRepository) {
+    UrlTokenController(final UrlTokenRepository urlTokenRepository) {
         this.urlTokenRepository = urlTokenRepository;
-        this.campaignRepository = campaignRepository;
     }
 
     @GetMapping

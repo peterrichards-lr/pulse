@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.Valid;
 
 @Entity
 public class UrlToken {
@@ -13,7 +14,8 @@ public class UrlToken {
     @JoinColumn(name = "acquisition_id")
     private Acquisition acquisition;
     @ManyToOne
-    @JoinColumn(name = "campaign_id")
+    @JoinColumn(name = "campaign_id", nullable = false)
+    @Valid
     private Campaign campaign;
     private @Id String token;
 
